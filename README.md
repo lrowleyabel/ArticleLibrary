@@ -6,7 +6,7 @@
 
 This is an R Shiny app for managing academic articles. It lets you add articles using a DOI, PDF or bib file and then tag the article with relevant themes. The app will then add the article to your Zotero account and store it in a searchable database. If you add a PDF, it will also save your PDFs in one place on your computer (sorted by year and author).
 
-**This is a work-in-progress and there are still various bugs...**
+**This is a  work-in-progress that I am developing as I use it for my PhD. Bear in my that there are still various bugs...**
 
 ### Getting started ###
 
@@ -29,6 +29,7 @@ This is an R Shiny app for managing academic articles. It lets you add articles 
 <p align="left">
   <img width="100%" src="./www/img/tutorial_run_app.png">
 </p>
+The first time you run the app, it may take a few minutes to launch as it needs to install several R packages.
 5. Once open, the app should detect that this is your first time running it, so will prompt you to complete some set-up steps.
 
 ### Adding articles ###
@@ -43,7 +44,7 @@ See below for a demo:
 
 ### Searching for articles ###
 
-To search for an article you have in your library, on the main *Search* tab, simply use the search bar. This lets you search by article tag, author or title. To open the article as a PDF, first select the item by clicking on it, the click *Read selected item*. Alternatively, if you do not have the PDF for an article, to open it online click *Open selected item online*.
+To search for an article you have in your library, on the main *Search* tab, simply use the search bar. This lets you search by article tag, author or title. To open the article as a PDF, first select the item by clicking on it, then click *Read selected item*. Alternatively, if you do not have the PDF for an article, to open it online click *Open selected item online*.
 
 In this tab, you can also edit the tags associated with an article by simply double-clicking in the tags column and editing. Tags must be separated by a semi-colon. You can also mark an article as read/unread or delete it.
 
