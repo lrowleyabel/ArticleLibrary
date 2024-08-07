@@ -14,7 +14,7 @@ This is an R Shiny app for managing academic articles. It lets you add articles 
 
 1. This app is written in R, so you need to have it installed. If you don't have R, download and install it from [here](https://cran.rstudio.com/).
 2. Make sure the path to R is added to your environment variable (instructions [here](https://info201.github.io/r-intro.html#:~:text=In%20Windows%2C%20You%20can%20add%20the%20R.exe%20and%20RScript.exe%20programs%20to%20your%20computer%E2%80%99s%20PATH%20by%20editing%20your%20machine%E2%80%99s%20Environment%20Variables%20through%20the%20Control%20Panel%3A)).
-2. Download/clone this repository. To download, click the green 'Code' button above and click *Download ZIP*, then unpack the ZIP file.
+2. Download/clone this repository. To download, click the green *Code* button above and click *Download ZIP*, then unpack the ZIP file.
 3. Save the *Article Library* folder wherever you want to keep it. The app will store your article database and the PDFs within this folder.
 4. To launch the app, run the *Article Library.bat* file and it should open in your default web browser. The first time you run the app, it may take a few minutes to open as it needs to install several R packages.
 5. Once open, the app should detect that this is your first time running it, so will prompt you to complete some set-up steps.
@@ -30,6 +30,7 @@ This is an R Shiny app for managing academic articles. It lets you add articles 
   <img width="100%" src="./www/img/tutorial_run_app.png">
 </p>
 The first time you run the app, it may take a few minutes to launch as it needs to install several R packages.
+
 5. Once open, the app should detect that this is your first time running it, so will prompt you to complete some set-up steps.
 
 ### Adding articles ###
