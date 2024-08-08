@@ -27,3 +27,46 @@ observeEvent(input$use_chrome_extension, {
   writeLines(text = jsonlite::toJSON(user_options), con = "Data/user_options.json")
   
 })
+
+
+observeEvent(input$update_app, {
+  
+  showModal(modalDialog(title = "Update app", p("Updating the app will replace the server files and app.R file with those from the latest version on GitHub. It will not change your library data or PDFs. To update, click Continue and when the update is complete, refresh the app in your browser."),
+                        attendantBar(id = "app_update_progress_bar"),
+                        br(),
+                        footer = list(actionButton(class = "btn-success", inputId = "update_app_confirmation", label = "Continue"), modalButton("Dismiss"))
+  ))
+  
+})  
+
+observeEvent(input$update_app_confirmation, {
+  withProgressAttendant({
+    
+    setProgressAttendant(value = 50, text = "Updating...")
+    
+    download.file(url = "https://github.com/lrowleyabel/ArticleLibrary/archive/refs/heads/main.zip",
+                  destfile = "../NewArticleLibrary.zip")
+    
+    unzip(zipfile = "../NewArticleLibrary.zip", exdir = "../NewArticleLibrary")
+    file.remove("../NewArticleLibrary.zip")
+    
+    existing_server_files<- dir("Server")
+    new_server_files<- dir("../NewArticleLibrary/ArticleLibrary-main/Server")
+    
+    sapply(existing_server_files, function(f){
+      file.remove(paste0("Server/",f))
+    })
+    
+    sapply(new_server_files, function(f){
+      file.rename(from = paste0("../NewArticleLibrary/ArticleLibrary-main/Server/", f), to = paste0("Server/", f))
+    })
+    
+    file.rename("../NewArticleLibrary/ArticleLibrary-main/app.R", "app.R")
+    
+    setProgressAttendant(value = 100, text = "Done")
+    
+  }, id = "app_update_progress_bar")
+  
+  
+  
+})

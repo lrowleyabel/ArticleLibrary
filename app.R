@@ -252,6 +252,11 @@ ui<- page_navbar(
              textInput("downloads_path", "Downloads path:"),
              actionButton("save_downloads_path", "Save")
            )
+      ),
+      card(card_header("General settings"),
+           card_body(
+             actionButton("update_app", "Update App")
+           )
       )
     )
   ),
