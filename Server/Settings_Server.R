@@ -83,3 +83,53 @@ observeEvent(input$update_app_confirmation, {
   
   
 })
+
+observeEvent(input$backup_data, {
+  
+  showModal(modalDialog(title = "Backup data to Google Drive",
+             p("This uploads a snapshot of your current Article Library data and PDFs to your Google Drive. You will be prompted to give the app permission to read/write/edit your files on Drive. The app will then store the data/PDFs in a ZIP file on Drive named with the current time stamp."),
+             attendantBar(id = "backup_progress_bar"),
+             footer = list(actionButton(inputId = "backup_data_confirmation", label = "Continue", class = "btn-success"), modalButton("Dismiss"))
+  ))
+  
+})
+
+observeEvent(input$backup_data_confirmation, {
+  
+  withProgressAttendant({
+    
+    setProgressAttendant(value = 30, text = "Copying PDFs...")
+    
+    backup_name<- paste("Article Library Backup", Sys.time())%>%
+      str_replace_all("[:punct:]", "_")
+    
+    backup_path<- paste0("Data/Backups/", backup_name) 
+    
+    dir.create(backup_path)
+    
+    dir.create(paste0(backup_path, "/PDFs"))
+    
+    fs::dir_copy("PDFs", paste0(backup_path, "/PDFs"), overwrite = T)
+    
+    setProgressAttendant(value = 35, text = "Copying data...")
+    
+    fs::file_copy("Data/Library/library.xlsx", backup_path)
+    
+    fs::file_copy("Data/user_options.json", backup_path)
+    
+    setProgressAttendant(value = 50, text = "Packaging backup...")
+    
+    zip(backup_path, files = backup_path)
+    
+    fs::dir_delete(backup_path)
+    
+    setProgressAttendant(value = 70, text = "Uploading to Drive...")
+    
+    drive_upload(paste0(backup_path, ".zip"))
+    
+    setProgressAttendant(value = 100, text = "Done")
+    
+    
+  }, id = "backup_progress_bar")
+  
+})

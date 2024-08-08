@@ -255,7 +255,8 @@ ui<- page_navbar(
       ),
       card(card_header("General settings"),
            card_body(
-             actionButton("update_app", "Update App")
+             actionButton("update_app", "Update App"),
+             actionButton("backup_data", "Backup data to Google Drive")
            )
       )
     )
