@@ -125,6 +125,8 @@ observeEvent(input$backup_data_confirmation, {
     
     setProgressAttendant(value = 70, text = "Uploading to Drive...")
     
+    drive_auth()
+    
     drive_upload(paste0(backup_path, ".zip"))
     
     setProgressAttendant(value = 100, text = "Done")
