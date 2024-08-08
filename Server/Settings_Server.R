@@ -44,10 +44,21 @@ observeEvent(input$update_app_confirmation, {
     
     setProgressAttendant(value = 50, text = "Updating...")
     
+    
+    if("NewArticleLibrary.zip" %in% dir("../")){
+      file.remove("../NewArticleLibrary.zip")
+    }
+    
     download.file(url = "https://github.com/lrowleyabel/ArticleLibrary/archive/refs/heads/main.zip",
                   destfile = "../NewArticleLibrary.zip")
     
+    
+    if("NewArticleLibrary" %in% dir("../")){
+      unlink("../NewArticleLibrary", recursive = T)
+    }
+    
     unzip(zipfile = "../NewArticleLibrary.zip", exdir = "../NewArticleLibrary")
+    
     file.remove("../NewArticleLibrary.zip")
     
     existing_server_files<- dir("Server")
@@ -62,6 +73,8 @@ observeEvent(input$update_app_confirmation, {
     })
     
     file.rename("../NewArticleLibrary/ArticleLibrary-main/app.R", "app.R")
+    
+    unlink("../NewArticleLibrary", recursive = T)
     
     setProgressAttendant(value = 100, text = "Done")
     
