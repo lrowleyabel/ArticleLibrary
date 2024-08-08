@@ -14,24 +14,26 @@ This is an R Shiny app for managing academic articles. It lets you add articles 
 
 1. This app is written in R, so you need to have it installed. If you don't have R, download and install it from [here](https://cran.rstudio.com/).
 2. Make sure the path to R is added to your environment variable (instructions [here](https://info201.github.io/r-intro.html#:~:text=In%20Windows%2C%20You%20can%20add%20the%20R.exe%20and%20RScript.exe%20programs%20to%20your%20computer%E2%80%99s%20PATH%20by%20editing%20your%20machine%E2%80%99s%20Environment%20Variables%20through%20the%20Control%20Panel%3A)).
-2. Download/clone this repository. To download, click the green *Code* button above and click *Download ZIP*, then unpack the ZIP file.
-3. Save the *Article Library* folder wherever you want to keep it. The app will store your article database and the PDFs within this folder.
-4. To launch the app, run the *Article Library.bat* file and it should open in your default web browser. The first time you run the app, it may take a few minutes to open as it needs to install several R packages.
-5. Once open, the app should detect that this is your first time running it, so will prompt you to complete some set-up steps.
-6. To make it quicker to launch the app, you can create a desktop shortcut to the *Article Library.bat* file.
+3. Shiny (a package in R) also needs to be installed before you can run the app. If you don't have it installed, open R or RStudio and enter `install.packages("shiny")` in the console and press enter. If you get an error when you do this, you may need to update your version of R.
+4. Download/clone this repository. To download, click the green *Code* button above and click *Download ZIP*, then unpack the ZIP file.
+5. Save the *Article Library* folder wherever you want to keep it. The app will store your article database and the PDFs within this folder.
+6. To launch the app, run the *Article Library.bat* file and it should open in your default web browser. The first time you run the app, it may take a few minutes to open as it needs to install several R packages.
+7. Once open, the app should detect that this is your first time running it, so will prompt you to complete some set-up steps.
+8. To make it quicker to launch the app, you can create a desktop shortcut to the *Article Library.bat* file.
 
 *Mac:*
 
 1. This app is written in R and it is easiest to launch it from RStudio. You can download R and RStudio by following the instructions [here](https://posit.co/download/rstudio-desktop/).
-2. Download/clone this repository. To download, click the green 'Code' button above and click *Download ZIP*, then unpack the ZIP file.
-3. Save the *Article Library* folder wherever you want to keep it. The app will store your article database and the PDFs within this folder.
-4. To launch the app, open the *app.R* file in RStudio and click the *Run App* button:
+2. Shiny (a package in R) also needs to be installed before you can run the app. If you don't have it installed, open R or RStudio and enter `install.packages("shiny")` in the console and press enter. If you get an error when you do this, you may need to update your version of R.
+3. Download/clone this repository. To download, click the green 'Code' button above and click *Download ZIP*, then unpack the ZIP file.
+4. Save the *Article Library* folder wherever you want to keep it. The app will store your article database and the PDFs within this folder.
+5. To launch the app, open the *app.R* file in RStudio and click the *Run App* button:
 <p align="left">
   <img width="100%" src="./www/img/tutorial_run_app.png">
 </p>
 The first time you run the app, it may take a few minutes to launch as it needs to install several R packages.
 
-5. Once open, the app should detect that this is your first time running it, so will prompt you to complete some set-up steps.
+6. Once open, the app should detect that this is your first time running it, so will prompt you to complete some set-up steps.
 
 ### Adding articles ###
 

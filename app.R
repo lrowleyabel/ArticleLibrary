@@ -1,6 +1,6 @@
 if(!require("pacman")) install.packages("pacman")
-cran_packages<- c("dplyr", "stringr", "htmlwidgets", "htmltools", "jsonlite", "shiny", "bslib", "waiter", "DT", "r2d3", "networkD3", "handlr", "bibtex", "rcrossref", "RefManageR", "pdftools")
-github_packages<- c("daqana/dqshiny", "giocomai/zoteror", "Bioconductor/Biobase")
+cran_packages<- c("dplyr", "stringr", "htmlwidgets", "htmltools", "jsonlite", "bslib", "waiter", "DT", "r2d3", "networkD3", "handlr", "bibtex", "rcrossref", "RefManageR", "pdftools", "readlxl", "writexl")
+github_packages<- c("daqana/dqshiny", "giocomai/zoteror")
 pacman::p_load(char = cran_packages)
 pacman::p_load_gh(char = github_packages)
 
