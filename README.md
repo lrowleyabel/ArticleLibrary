@@ -27,13 +27,13 @@ This is an R Shiny app for managing academic articles. It lets you add articles 
 2. Shiny (a package in R) also needs to be installed before you can run the app. If you don't have it installed, open R or RStudio and enter `install.packages("shiny")` in the console and press enter. If you get an error when you do this, you may need to update your version of R.
 3. Download/clone this repository. To download, click the green 'Code' button above and click *Download ZIP*, then unpack the ZIP file.
 4. Save the *Article Library* folder wherever you want to keep it. The app will store your article database and the PDFs within this folder.
-5. To launch the app, open the *app.R* file in RStudio and click the *Run App* button:
+5. Open RStudio and then open the *app.R* file that is in the *Article Library* folder.
+6. Tell RStudio to launch Shiny apps in your default browser by clicking the arrow to the right of the *Run App* button (see image below) and selecting *Run External*.
 <p align="left">
   <img width="100%" src="./www/img/tutorial_run_app.png">
 </p>
-The first time you run the app, it may take a few minutes to launch as it needs to install several R packages.
-
-6. Once open, the app should detect that this is your first time running it, so will prompt you to complete some set-up steps.
+7. Launch the app by clicking the *Run App* button. The first time you run the app, it may take a few minutes to launch as it needs to install several R packages.
+8. Once open, the app should detect that this is your first time running it, so will prompt you to complete some set-up steps.
 
 ### Adding articles ###
 
