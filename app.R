@@ -11,8 +11,6 @@ ui<- page_navbar(
   
   shinyjs::useShinyjs(),
   
-  
-  
   theme = bs_theme(bootswatch = "flatly",
                    "progress-height" = "1.5rem")%>%
     bs_add_rules(sass::sass_file("www/css/custom.scss")),

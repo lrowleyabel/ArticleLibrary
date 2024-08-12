@@ -109,9 +109,13 @@ observeEvent(input$add_items_pdf, {
   withProgressAttendant({
     
     setProgressAttendant(value = 10, text = "Adding...")
-  
-    new_items<- response$new_items
-  
+    
+    if(is.null(edited_response$new_items)){
+      new_items<- response$new_items
+    } else {
+      new_items<- edited_response$new_items
+    }
+    
     # Attach tags
     
     new_items<- new_items%>%
@@ -168,7 +172,7 @@ observeEvent(input$add_items_pdf, {
 
 observeEvent(input$add_items_text_doi, {
   
-  # Get item from PDF  
+  # Get item from DOI
   
   response<- item_from_doi(doi = input$text_doi_add)
   
@@ -193,7 +197,12 @@ observeEvent(input$add_items_text_doi, {
     
     setProgressAttendant(value = 10, text = "Adding...")
     
-    new_items<- response$new_items
+    if(is.null(edited_response$new_items)){
+      new_items<- response$new_items
+    } else {
+      new_items<- edited_response$new_items
+    }
+    
     
     # Attach tags
     
@@ -250,22 +259,28 @@ observeEvent(input$add_items_text_doi, {
 update_autocomplete_input(session = session, id = "input_tag", label = "Add tags to new item:", options = existing_tags, create = TRUE)
 
 current_tags<- reactiveValues(tags = NULL)
+edited_response<- reactiveValues(new_items = NULL)
 
 observeEvent(input$item_upload, {
   
   current_tags$tags<- NULL
+  edited_response$new_items<- NULL
   
 })
 
 observeEvent(input$item_pdf_upload, {
   
   current_tags$tags<- NULL
+  edited_response$new_items<- NULL
+  updateTextInput(inputId = "text_doi_add", value = "")
   
 })
 
 observeEvent(input$text_doi_add, {
   
   current_tags$tags<- NULL
+  edited_response$new_items<- NULL
+  shinyjs::reset(id = "item_pdf_upload")
   
 })
 
@@ -490,4 +505,26 @@ observeEvent(input$manual_submit, {
     
   }, id = "manual_submission_progress_bar")
   
+})
+
+
+observeEvent(input$new_items_display_cell_edit, {
+  
+  edit<- input$new_items_display_cell_edit
+  
+  if (!is.null(input$item_pdf_upload)){
+    response<- item_from_pdf()
+  }
+  if (!is.null(input$text_doi_add) & input$text_doi_add != ""){
+    response<- item_from_doi(input$text_doi_add)
+  }
+      
+  current_new_items<- response$new_items
+  displayed_cols<- c("author", "year", "title", "tags")
+  edited_col<- displayed_cols[edit$col+1]
+  print(edited_col)
+  edited_new_items<- current_new_items
+  edited_new_items[edit$row,edited_col]<- edit$value
+  edited_response$new_items<- edited_new_items
+    
 })
