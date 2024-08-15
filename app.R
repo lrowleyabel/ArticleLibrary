@@ -240,7 +240,8 @@ ui<- page_navbar(
              actionLink(input = "no_zotero_credentials", label = "Don't have these?"),
              textInput("library_id", "Zotero library ID:"),
              textInput("api_key", "Zotero API key:"),
-             actionButton("save_zotero_settings", "Save")
+             actionButton("save_zotero_settings", "Save"),
+             actionButton("import_zotero_dois", "Import Zotero DOIs")
            )
       ),
       card(card_header("Chrome extensions settings"),

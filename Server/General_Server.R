@@ -252,6 +252,8 @@ add_item_to_library<- function(item, with_pdf = FALSE, zotero){
 }
 add_item_to_zotero<- function(item){
   
+  zotero_data<- read.csv("Data/Zotero Data.csv")
+  
   # x<- tryCatch({RefManageR::ReadZotero(user = user_options$zotero_library_id, .params = list(key = user_options$zotero_api_key, qmode = "everything", q = item$title))},
   #              error = function(e){
   #                showModal(modalDialog(title = "Error", paste("Error calling Zotero API:", e)))
@@ -259,24 +261,91 @@ add_item_to_zotero<- function(item){
   #              })
   # 
   
-  if (item$doi %in% user_options$existing_zotero_dois){
-    return(0)
+  if (item$doi %in% zotero_data$DOI){
+    
+    print("Item in Zotero already")
+    
+    # Find existing zotero key and version for the item
+    existing_key<- zotero_data$key[zotero_data$DOI == item$doi & !is.na(zotero_data$DOI)]
+    existing_version<- zotero_data$version[zotero_data$DOI == item$doi & !is.na(zotero_data$DOI)]
+    
+    # Delete the existing item
+    
+    print("Deleting existing item in Zotero")
+    url <- paste0("https://api.zotero.org/users/", user_options$zoter_library_id, "/items/", existing_key)
+    
+    response <- DELETE(
+      url,
+      add_headers(Authorization = paste("Bearer", user_options$zotero_api_key),
+                  `If-Unmodified-Since-Version` = existing_version)
+    )
+    
+    # Create a new item
+    print("Adding new item to Zotero")
+    
+    zot_item<- item%>%
+      mutate(creators = zot_convert_creators_to_df_list(author, separator_multiple_authors = " and "),
+             date = year,
+             DOI = doi,
+             publicationTitle = journal)%>%
+      select(itemType, title, creators, publicationTitle, volume, issue, pages, date, DOI, ISSN, url)
+    
+    # Send new item to Zotero
+    url<- paste0("https://api.zotero.org/users/",user_options$zotero_library_id, "/items?key=", user_options$zotero_api_key)
+    #url<- paste0("https://api.zotero.org/users/",zotero_user_id, "/items?key=", zotero_api_key)
+    
+    response <- httr::POST(url = url,
+                           config = httr::add_headers("Content-Type : application/json",
+                                                      paste0("Zotero-Write-Token: ", paste(sample(c(0:9, letters, LETTERS), 32, replace = TRUE), collapse = ""))), 
+                           body = jsonlite::toJSON(x = zot_item, auto_unbox = TRUE))
+    
+    response_data<- fromJSON(content(response, "text", encoding = "UTF-8"))
+    
+    # Add new item key and DOI to the locally stored Zotero data
+    new_item_key<- response_data$success$`0`
+    new_item_version<- response_data$successful$`0`$data$version
+    
+    zotero_data<- rbind(zotero_data, data.frame(key = new_item_key, version = new_item_version, DOI = item$doi))
+    
+    write.csv(zotero_data, file = "Data/Zotero Data.csv", row.names = F)
+    
+    code<- 0
+    
+  } else {
+    
+    # Create a new item
+    zot_item<- item%>%
+      mutate(creators = zot_convert_creators_to_df_list(author, separator_multiple_authors = " and "),
+             date = year,
+             DOI = doi,
+             publicationTitle = journal)%>%
+      select(itemType, title, creators, publicationTitle, volume, issue, pages, date, DOI, ISSN, url)
+    
+    # Send new item to Zotero
+    url<- paste0("https://api.zotero.org/users/",user_options$zotero_library_id, "/items?key=", user_options$zotero_api_key)
+    #url<- paste0("https://api.zotero.org/users/",zotero_user_id, "/items?key=", zotero_api_key)
+    
+    response <- httr::POST(url = url,
+                           config = httr::add_headers("Content-Type : application/json",
+                                                      paste0("Zotero-Write-Token: ", paste(sample(c(0:9, letters, LETTERS), 32, replace = TRUE), collapse = ""))), 
+                           body = jsonlite::toJSON(x = zot_item, auto_unbox = TRUE))
+    
+    response_data<- fromJSON(content(response, "text", encoding = "UTF-8"))
+    
+    # Add new item key and DOI to the locally stored Zotero data
+    new_item_key<- response_data$success$`0`
+    
+    new_item_version<- response_data$successful$`0`$data$version
+    
+    zotero_data<- rbind(zotero_data, data.frame(key = new_item_key, version = new_item_version, DOI = item$doi))
+    
+    write.csv(zotero_data, file = "Data/Zotero Data.csv", row.names = F)
+    
+    code<- 1
+    
   }
 
-  zot_item<- item%>%
-    mutate(creators = zot_convert_creators_to_df_list(author, separator_multiple_authors = " and "),
-           date = year,
-           DOI = doi,
-           publicationTitle = journal)%>%
-    select(itemType, title, creators, publicationTitle, volume, issue, pages, date, DOI, ISSN, url)
-  
-  zot_create_items(item_df = zot_item)
-  
-  user_options$existing_zotero_dois<- append(user_options$existing_zotero_dois, item$doi)
-  
-  writeLines(text = jsonlite::toJSON(user_options), con = "Data/user_options.json")
-  
-  return(1)
+  return(code)
   
   
 }

@@ -100,36 +100,6 @@ observeEvent(input$setup_save_zotero_settings, {
     
     setProgressAttendant(value = 10, text = "Fetching...")
     
-    while (is.list(zotero_results)) {
-      
-      print(paste("Fetching, starting at", end+1))
-    
-      zotero_results<- RefManageR::ReadZotero(user = user_options$zotero_library_id, .params = list(key = user_options$zotero_api_key, limit = 100, start = end+1, sort = "dateAdded"))
-      
-      
-      if (is.null(zotero_results)){
-        print("Breaking because is null")
-        break
-      }
-      
-      if (all(zotero_results$doi %in% user_options$existing_zotero_dois, na.rm = T)){
-        print(paste0("Breaking because all already in list"))
-        
-        break
-      }
-      
-      new_dois<- zotero_results$doi[!zotero_results$doi %in% user_options$existing_zotero_dois]%>%
-        unname()%>%
-        unlist()
-      
-      user_options$existing_zotero_dois<<- append(user_options$existing_zotero_dois, new_dois)
-      
-      end<- end+length(zotero_results)
-      
-      setProgressAttendant(value = end/10, text = "Fetching...")
-      
-    }
-    
   }, id = "zotero_fetch_progress")
   
   

@@ -135,3 +135,53 @@ observeEvent(input$backup_data_confirmation, {
   }, id = "backup_progress_bar")
   
 })
+
+observeEvent(input$import_zotero_dois, {
+  
+  end<- 0
+  
+  zotero_data<- data.frame(key = c(), version = c(), DOI = c())
+  zotero_results<- data.frame()
+  
+  
+  while (is.data.frame(zotero_results)) {
+    
+    start<- end+1
+    
+    print(paste("Fetching, starting at item", start))
+    
+    # Construct the API URL to retrieve items
+    url <- paste0("https://api.zotero.org/users/", user_options$zotero_library_id, "/items?format=json&limit=100&start=", start)
+    
+    # Send the GET request to retrieve items
+    response <- GET(
+      url,
+      add_headers(Authorization = paste("Bearer", user_options$zotero_api_key))
+    )
+    
+    zotero_results <- fromJSON(content(response, "text", encoding = "UTF-8"))$data
+    
+    if (is.null(zotero_results)){
+      print("Breaking because is null")
+      break
+    }
+    
+    if (all(zotero_results$DOI %in% zotero_data$DOI, na.rm = T)){
+      print(paste0("Breaking because all already in list"))
+      
+      break
+    }
+    
+    new_dois<- zotero_results%>%
+      filter(!DOI %in% zotero_data$DOI)%>%
+      select(key, version, DOI)
+    
+    zotero_data<- rbind(zotero_data, new_dois)
+    
+    end<- end+nrow(zotero_results)
+    
+  }
+  
+  write.csv(zotero_data, "Data/Zotero Data.csv", row.names = F)
+  
+})
