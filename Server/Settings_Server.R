@@ -138,50 +138,204 @@ observeEvent(input$backup_data_confirmation, {
 
 observeEvent(input$import_zotero_dois, {
   
+  showModal(modalDialog(title = "Update memory of Zotero items",
+                        p("This checks what DOIs are already in your Zotero library so that the app doesn't duplicate items when you add them."),
+                        attendantBar(id = "import_zotero_progress_bar")
+                        ))
+  
+  
+  url <- paste0("https://api.zotero.org/users/", user_options$zotero_library_id, "/items?limit=0")
+  
+  response <- GET(
+    url,
+    add_headers(Authorization = paste("Bearer", user_options$zotero_api_key))
+  )
+  
+  total_zotero_items<- as.numeric(headers(response)[["Total-Results"]])
+  
   end<- 0
   
   zotero_data<- data.frame(key = c(), version = c(), DOI = c())
   zotero_results<- data.frame()
-  
-  
-  while (is.data.frame(zotero_results)) {
+
+  withProgressAttendant({
     
-    start<- end+1
+    setProgressAttendant(value = 10)
     
-    print(paste("Fetching, starting at item", start))
-    
-    # Construct the API URL to retrieve items
-    url <- paste0("https://api.zotero.org/users/", user_options$zotero_library_id, "/items?format=json&limit=100&start=", start)
-    
-    # Send the GET request to retrieve items
-    response <- GET(
-      url,
-      add_headers(Authorization = paste("Bearer", user_options$zotero_api_key))
-    )
-    
-    zotero_results <- fromJSON(content(response, "text", encoding = "UTF-8"))$data
-    
-    if (is.null(zotero_results)){
-      print("Breaking because is null")
-      break
-    }
-    
-    if (all(zotero_results$DOI %in% zotero_data$DOI, na.rm = T)){
-      print(paste0("Breaking because all already in list"))
+    while (is.data.frame(zotero_results)) {
       
-      break
+      start<- end+1
+      
+      print(paste("Fetching, starting at item", start))
+      
+      # Construct the API URL to retrieve items
+      url <- paste0("https://api.zotero.org/users/", user_options$zotero_library_id, "/items?format=json&limit=100&start=", start)
+      
+      # Send the GET request to retrieve items
+      response <- GET(
+        url,
+        add_headers(Authorization = paste("Bearer", user_options$zotero_api_key))
+       )
+      
+      zotero_results <- fromJSON(content(response, "text", encoding = "UTF-8"))$data
+      
+      if (is.null(zotero_results)){
+        print("Breaking because is null")
+        break
+      }
+      
+      if (all(zotero_results$DOI %in% zotero_data$DOI, na.rm = T)){
+        print(paste0("Breaking because all already in list"))
+        
+        break
+      }
+      
+      new_dois<- zotero_results%>%
+        filter(!DOI %in% zotero_data$DOI)%>%
+        select(key, version, DOI)
+      
+      zotero_data<- rbind(zotero_data, new_dois)
+      
+      end<- end+nrow(zotero_results)
+      
+      setProgressAttendant(value = 100*(end/total_zotero_items), text = paste("Fetched", end, "items from Zotero..."))
+      
     }
     
-    new_dois<- zotero_results%>%
-      filter(!DOI %in% zotero_data$DOI)%>%
-      select(key, version, DOI)
+    write.csv(zotero_data, "Data/Zotero Data.csv", row.names = F)
     
-    zotero_data<- rbind(zotero_data, new_dois)
+    setProgressAttendant(value = 100, text = "Done")
     
-    end<- end+nrow(zotero_results)
-    
-  }
+  }, id = "import_zotero_progress_bar")
   
-  write.csv(zotero_data, "Data/Zotero Data.csv", row.names = F)
+
+})
+
+proposed_deletions<- reactiveVal(data.frame(key = c(), title = c(), date_added = c()))
+
+observeEvent(input$clear_zotero_pdfs, {
+  
+  df<- readxl::read_xlsx("Data/Library/library.xlsx")
+  
+  library_dois<- df$doi
+  
+  zotero_data<- read.csv("Data/Zotero Data.csv")
+  
+  showModal(modalDialog(title = "Clear Zotero PDFs",
+                        p("This searches for potential items to delete from Zotero. An item will be proposed for deletion if it has a PDF attached in Zotero and is also duplicated."),
+                        attendantBar(id = "zotero_clear_progress_bar"),
+                        p("The below items are proposed for deletion:"),
+                        renderDataTable(datatable(data = proposed_deletions(),
+                                                        style = "bootstrap4",
+                                                        class = "hover",
+                                                        rownames = FALSE,
+                                                        selection = "multiple",
+                                                        fillContainer = TRUE,
+                                                        escape = FALSE,
+                                                        editable = T,
+                                                        options = list(paging = FALSE,
+                                                                       searching = FALSE,
+                                                                       columnDefs = list(
+                                                                         list(
+                                                                           targets = c(0),
+                                                                           render = DT::JS(
+                                                                             "function(data, type, row, meta) {",
+                                                                             "return type === 'display' && data.length > 1 ?",
+                                                                             "'<span title=\"' + data + '\">' + data.substr(0, 15) + '...</span>' : data;",
+                                                                             "}")
+                                                                         )
+                                                                       )
+                                                        )
+                        )),
+                        size = "xl",
+                        footer = list(actionButton("clear_zotero_pdfs_confirmation", "Delete items"), modalButton("Dismiss"))))
+  
+  withProgressAttendant({
+    
+    i<- 0
+    
+    for(doi in library_dois){
+      
+      i<- i+1
+      
+      setProgressAttendant(value = 100*(i/length(library_dois)), text = paste("Checked", i, "item(s)"))
+      
+      zotero_matches<- zotero_data%>%
+        filter(DOI == doi)
+      
+      if(nrow(zotero_matches)>1){
+        
+        duplicated_title<- df$title[df$doi==doi]
+        
+        url <- paste0("https://api.zotero.org/users/", user_options$zotero_library_id, "/items?format=json&q=", URLencode(duplicated_title), "&qmode=titleCreatorYear")
+        
+        response <- GET(
+          url,
+          add_headers(Authorization = paste("Bearer", user_options$zotero_api_key))
+        )
+        
+        
+        items <- fromJSON(content(response, "text", encoding = "UTF-8"))
+        
+        duplicates_with_pdfs<- items[items$meta$numChildren>0,]
+        
+        print(nrow(duplicates_with_pdfs))
+        
+        new_proposed_deletions<- data.frame(key = duplicates_with_pdfs$key,
+                                            title = duplicates_with_pdfs$data$title,
+                                            date_added = duplicates_with_pdfs$data$dateAdded)
+        
+        print(new_proposed_deletions)
+        
+        proposed_deletions(rbind(proposed_deletions(), new_proposed_deletions))
+        
+      }
+      
+    }
+    setProgressAttendant(value = 100, text = "Done")
+    
+  
+  }, id = "zotero_clear_progress_bar")
   
 })
+
+observeEvent(input$clear_zotero_pdfs_confirmation, {
+  
+  withProgressAttendant({
+    
+    setProgressAttendant(value = 0, text = "Deleting...")
+    
+    Sys.sleep(2)
+    
+    keys<- proposed_deletions()$key
+    
+    if(length(keys)==0){
+      setProgressAttendant(value = 100, text = "Nothing to delete")
+    }
+  
+    zotero_data<- read.csv("Data/Zotero Data.csv")
+    
+    i<- 0
+    
+    for(key in keys){
+      
+      i<- i + 1
+      
+      version<- zotero_data$version[zotero_data$key==key]
+      
+      url <- paste0("https://api.zotero.org/users/", user_options$zotero_library_id, "/items/", key)
+      
+      response <- DELETE(
+        url,
+        add_headers(Authorization = paste("Bearer", user_options$zotero_api_key),
+                    `If-Unmodified-Since-Version` = version)
+      )
+      
+      setProgressAttendant(value = 100*(i/length(keys)), text = paste("Deleted", key))
+      
+    }
+    
+  }, id = "zotero_clear_progress_bar")
+  
+})
+

@@ -241,7 +241,8 @@ ui<- page_navbar(
              textInput("library_id", "Zotero library ID:"),
              textInput("api_key", "Zotero API key:"),
              actionButton("save_zotero_settings", "Save"),
-             actionButton("import_zotero_dois", "Import Zotero DOIs")
+             actionButton("import_zotero_dois", "Update memory of Zotero"),
+             actionButton("clear_zotero_pdfs", "Clear Zotero PDFs")
            )
       ),
       card(card_header("Chrome extensions settings"),
