@@ -1,41 +1,47 @@
-
-net_df<- readxl::read_excel("Data/Library/library.xlsx")
-
-if (nrow(net_df)!=0){
-
-  net_df<- net_df%>%
-    filter(!duplicated(doi))%>%
-    filter(tags != "" & !is.na(tags))
+tryCatch({
   
-  net<- data.frame(source = c(), target = c())
+  net_df<- readxl::read_excel("Data/Library/library.xlsx")
   
-  lapply(net_df$title, FUN = function(title){
+  if (nrow(net_df)!=0){
+  
+    net_df<- net_df%>%
+      filter(!duplicated(doi))%>%
+      filter(tags != "" & !is.na(tags))
     
-    tags<- net_df$tags[net_df$title==title]
+    net<- data.frame(source = c(), target = c())
     
-    lapply(str_split(tags,pattern = "; "), FUN = function(tag){
+    lapply(net_df$title, FUN = function(title){
       
-      new_net_item<- data.frame(source = title, target = tag)
-      net<<- rbind(net, new_net_item)
+      tags<- net_df$tags[net_df$title==title]
+      
+      lapply(str_split(tags,pattern = "; "), FUN = function(tag){
+        
+        new_net_item<- data.frame(source = title, target = tag)
+        net<<- rbind(net, new_net_item)
+        return(NULL)
+      })
       return(NULL)
     })
-    return(NULL)
-  })
+    
+    
+    nodes<- data.frame(name = c(unique(net$source), unique(net$target)),
+                       group = c(rep("Paper", length(unique(net$source))), rep("Tag", length(unique(net$target)))),
+                       size = c(rep(0.1, length(unique(net$source))), rep(100, length(unique(net$target)))),
+                       author = c(net_df$author[net_df$title == unique(net$source)], rep(NA, length(unique(net$target)))))
+    
+    
+    
+    force_net<- data.frame(source = lapply(net$source, function(s){which(nodes$name == s)})%>%
+                             unlist()-1,
+                           target = lapply(net$target, function(s){which(nodes$name == s)})%>%
+                             unlist()-1)
   
-  
-  nodes<- data.frame(name = c(unique(net$source), unique(net$target)),
-                     group = c(rep("Paper", length(unique(net$source))), rep("Tag", length(unique(net$target)))),
-                     size = c(rep(0.1, length(unique(net$source))), rep(100, length(unique(net$target)))),
-                     author = c(net_df$author[net_df$title == unique(net$source)], rep(NA, length(unique(net$target)))))
-  
-  
-  
-  force_net<- data.frame(source = lapply(net$source, function(s){which(nodes$name == s)})%>%
-                           unlist()-1,
-                         target = lapply(net$target, function(s){which(nodes$name == s)})%>%
-                           unlist()-1)
+  }
+},
 
-}
+error = function(e){cat(paste0("Error producing network plot data:\n", e))}
+
+)
 
 output$force_network<- renderForceNetwork({
   

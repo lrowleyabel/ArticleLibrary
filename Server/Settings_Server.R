@@ -184,21 +184,30 @@ observeEvent(input$import_zotero_dois, {
         break
       }
       
-      if (all(zotero_results$DOI %in% zotero_data$DOI, na.rm = T)){
+      if (all(zotero_results$key %in% zotero_data$key, na.rm = T)){
         print(paste0("Breaking because all already in list"))
         
         break
       }
       
-      new_dois<- zotero_results%>%
-        filter(!DOI %in% zotero_data$DOI)%>%
+      zotero_article_results<- zotero_results%>%
+        filter(itemType == "journalArticle")
+      
+      if (nrow(zotero_article_results)==0){
+        end<- end+nrow(zotero_results)
+        print("Skipping because returned results contained no journal articles")
+        next
+      }
+      
+      new_dois<- zotero_article_results%>%
+        filter(!key %in% zotero_data$key)%>%
         select(key, version, DOI)
       
       zotero_data<- rbind(zotero_data, new_dois)
       
       end<- end+nrow(zotero_results)
       
-      setProgressAttendant(value = 100*(end/total_zotero_items), text = paste("Fetched", end, "items from Zotero..."))
+      #setProgressAttendant(value = 100*(end/total_zotero_items), text = paste("Fetched", end, "items from Zotero..."))
       
     }
     
