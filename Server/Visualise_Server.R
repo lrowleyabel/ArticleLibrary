@@ -3,7 +3,7 @@ tryCatch({
   net_df<- readxl::read_excel("Data/Library/library.xlsx")
   
   if (nrow(net_df)!=0){
-  
+    
     net_df<- net_df%>%
       filter(!duplicated(doi))%>%
       filter(tags != "" & !is.na(tags))
@@ -26,8 +26,7 @@ tryCatch({
     
     nodes<- data.frame(name = c(unique(net$source), unique(net$target)),
                        group = c(rep("Paper", length(unique(net$source))), rep("Tag", length(unique(net$target)))),
-                       size = c(rep(0.1, length(unique(net$source))), rep(100, length(unique(net$target)))),
-                       author = c(net_df$author[net_df$title == unique(net$source)], rep(NA, length(unique(net$target)))))
+                       size = c(rep(0.1, length(unique(net$source))), rep(100, length(unique(net$target)))))
     
     
     
@@ -35,7 +34,7 @@ tryCatch({
                              unlist()-1,
                            target = lapply(net$target, function(s){which(nodes$name == s)})%>%
                              unlist()-1)
-  
+    
   }
 },
 
@@ -48,21 +47,21 @@ output$force_network<- renderForceNetwork({
   if (!exists("force_net")){
     return(NULL)
   }
-    
+  
   x<- forceNetwork(Links = force_net,
-               Nodes = nodes,
-               Source = "source",
-               Target = "target",
-               NodeID = "name",
-               Nodesize = "size",
-               opacity = 1,
-               Group = "group",
-               colourScale = JS(" d3.scaleOrdinal(['#2c3e50', '#18bc9c']);"),
-               zoom = TRUE,
-               fontSize = 30,
-               fontFamily = "Sans-Serif",
-               opacityNoHover = 0,
-               bounded = TRUE)
+                   Nodes = nodes,
+                   Source = "source",
+                   Target = "target",
+                   NodeID = "name",
+                   Nodesize = "size",
+                   opacity = 1,
+                   Group = "group",
+                   colourScale = JS(" d3.scaleOrdinal(['#2c3e50', '#18bc9c']);"),
+                   zoom = TRUE,
+                   fontSize = 30,
+                   fontFamily = "Sans-Serif",
+                   opacityNoHover = 0,
+                   bounded = TRUE)
   
   x<- x%>%
     onRender(x = ., jsCode = "
@@ -173,7 +172,7 @@ output$force_network<- renderForceNetwork({
                            ", data = force_net)
   
   return(x)
-      
+  
   
 })
 
