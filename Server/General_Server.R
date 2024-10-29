@@ -226,7 +226,7 @@ add_item_to_library<- function(item, with_pdf = FALSE, zotero){
         next_letter<- letters[which(used_letters == letters)+1]
         
       } else {
-        next_letter<- ""
+        next_letter<- "a"
       }
       
     }
